@@ -37,6 +37,11 @@ function carousel3() {
   x[myIndex3-1].style.display = "block";
   setTimeout(carousel3, 5000); // Change image every 6 seconds
 }
+
+
+
+
+
 $(document).ready(function(){
   carousel();
   carousel2();

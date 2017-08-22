@@ -4,6 +4,8 @@ require 'rest-client'
 class Movie < ActiveRecord::Base
   has_and_belongs_to_many(:actors)
 
+  @@movies = nil;
+
   attr_accessor :name
 
   def initalize
@@ -39,6 +41,46 @@ class Movie < ActiveRecord::Base
   def find_actor_id (actor_name)
     response = RestClient.get"https://api.themoviedb.org/3/search/person?api_key=0431a9e2b26e9382f536559e359e0862&language=en-US&page=1&include_adult=false&query=#{actor_name}"
     actor_id = JSON.parse(response)['results'][0]['id']
+  end
+
+
+  def self.Load_movies
+    actors_array = ["Robert De Niro",
+      "Jack Nicholson",
+      "Tom Hanks",
+      "Tom Hardy",
+      "Nicolas Cage",
+      "Leonardo DiCaprio",
+      "Johnny Depp",
+      "Al Pacino",
+      "Denzel Washington",
+      "Brad Pitt"
+    ]
+    movie = Movie.new
+    actors_array.each do |actor_name|
+    @@movies = movie.find_movies(movie.find_actor_id(actor_name))
+    actor_name2 = actor_name
+      @@movies.each do |movie|
+        if Movie.exists?(title: movie[:title])
+          current_movie = Movie.find_by title: movie[:title]
+        else
+          new_movie = Movie.create(title: movie[:title])
+        if Actor.exists?(name: actor_name2) && Movie.exists?(current_movie)
+          actor = Actor.find_by name: actor_name2
+          actor.movies.push(current_movie)
+        else
+          movie[:actors].each do |actor|
+            if Actor.exists?(name: actor)
+              current_actor = Actor.find_by name: actor
+              new_movie.actors.push(current_actor)
+           else
+              new_movie.actors.push(Actor.create(name: actor))
+            end
+          end
+        end
+        end
+      end
+    end
   end
 
 end
